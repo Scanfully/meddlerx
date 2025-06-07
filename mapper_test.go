@@ -1,4 +1,4 @@
-package meddler
+package meddlerx
 
 import (
 	"testing"

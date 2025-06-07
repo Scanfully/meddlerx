@@ -1,4 +1,4 @@
-package meddler
+package meddlerx
 
 import (
 	"io"
@@ -15,7 +15,7 @@ func TestLoad(t *testing.T) {
 	elt := new(Person)
 	elt.Age = 50
 	elt.Closed = time.Now()
-	if err := Load(db, "person", elt, 2); err != nil {
+	if err := Load(testCtx, db, "person", elt, 2); err != nil {
 		t.Errorf("Load error on Bob: %v", err)
 		return
 	}
@@ -24,7 +24,7 @@ func TestLoad(t *testing.T) {
 	db.Exec("delete from person")
 
 	// test for err on invalid table
-	if err := Load(db, "invalid_table_name", elt, 2); err == nil {
+	if err := Load(testCtx, db, "invalid_table_name", elt, 2); err == nil {
 		t.Errorf("Load on invalid table, expected err, got nil")
 	}
 }
@@ -37,13 +37,13 @@ func TestNoPrimaryKey(t *testing.T) {
 		Name string
 	}
 	elt2 := new(personWithoutPK)
-	if err := Load(db, "person", elt2, 2); err == nil {
+	if err := Load(testCtx, db, "person", elt2, 2); err == nil {
 		t.Error("Load on struct without PK: expected err, got nil")
 	}
-	if err := Update(db, "person", elt2); err == nil {
+	if err := Update(testCtx, db, "person", elt2); err == nil {
 		t.Error("Update on struct without PK: expected err, got nil")
 	}
-	if err := Save(db, "person", elt2); err == nil {
+	if err := Save(testCtx, db, "person", elt2); err == nil {
 		t.Error("Save on struct without PK: expected err, got nil")
 	}
 }
@@ -55,7 +55,7 @@ func TestLoadUint(t *testing.T) {
 	elt := new(UintPerson)
 	elt.Age = 50
 	elt.Closed = time.Now()
-	if err := Load(db, "person", elt, 2); err != nil {
+	if err := Load(testCtx, db, "person", elt, 2); err != nil {
 		t.Errorf("Load error on Bob: %v", err)
 		return
 	}
@@ -67,7 +67,7 @@ func TestQueryAll(t *testing.T) {
 	once.Do(setup)
 	insertAliceBob(t)
 	var people []*Person
-	if err := QueryAll(db, &people, "SELECT * FROM person", ""); err != nil {
+	if err := QueryAll(testCtx, db, &people, "SELECT * FROM person", ""); err != nil {
 		t.Errorf("QueryAll error: %v", err)
 	}
 
@@ -78,7 +78,7 @@ func TestQueryAll(t *testing.T) {
 	db.Exec("delete from person")
 
 	// test on unexisting table
-	if err := QueryAll(db, &people, "SELECT * FROM invalid_table_name"); err == nil {
+	if err := QueryAll(testCtx, db, &people, "SELECT * FROM invalid_table_name"); err == nil {
 		t.Errorf("QueryAll on invalid table, expected err, got nil")
 	}
 }
@@ -105,11 +105,11 @@ func TestSave(t *testing.T) {
 		t.Errorf("DB error on begin: %v", err)
 	}
 	// test invalid table for err return value
-	if err := Save(tx, "invalid_table_name", chris); err == nil {
+	if err := Save(testCtx, tx, "invalid_table_name", chris); err == nil {
 		t.Error("Save with invalid table, expected err, got nil")
 	}
 	// save correctly
-	if err = Save(tx, "person", chris); err != nil {
+	if err = Save(testCtx, tx, "person", chris); err != nil {
 		t.Errorf("DB error on Save: %v", err)
 	}
 
@@ -121,7 +121,7 @@ func TestSave(t *testing.T) {
 	chris.Email = "chris@chrischris.com"
 	chris.Age = 27
 
-	if err = Save(tx, "person", chris); err != nil {
+	if err = Save(testCtx, tx, "person", chris); err != nil {
 		t.Errorf("DB error on Save: %v", err)
 	}
 	if chris.ID != id {
@@ -165,7 +165,7 @@ func TestDriverErr(t *testing.T) {
 	once.Do(setup)
 	// insert into an invalid table
 	alice.ID = 0
-	err = Insert(db, "invalid", alice)
+	err = Insert(testCtx, db, "invalid", alice)
 	if err == nil {
 		t.Fatal("insert into invalid table, want error, got none")
 	}
@@ -179,14 +179,14 @@ func TestDriverErr(t *testing.T) {
 
 	// insert with primary key set
 	alice.ID = 1
-	err = Insert(db, "person", alice)
+	err = Insert(testCtx, db, "person", alice)
 	if err == nil {
 		t.Errorf("insert with primary key already set. want error, got none")
 	}
 
 	// update with primary key not set
 	alice.ID = 0
-	err = Update(db, "person", alice)
+	err = Update(testCtx, db, "person", alice)
 	if err == nil {
 		t.Errorf("update with primary key 0. want error, got none")
 	}

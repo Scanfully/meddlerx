@@ -1,4 +1,4 @@
-package meddler
+package meddlerx
 
 import (
 	"database/sql"
@@ -256,7 +256,7 @@ func personEqual(t *testing.T, elt *Person, ref *Person) {
 func insertAliceBob(t *testing.T) {
 	// insert Alice as row #1
 	alice.ID = 0
-	if err := Insert(db, "person", alice); err != nil {
+	if err := Insert(testCtx, db, "person", alice); err != nil {
 		t.Errorf("Error inserting Alice: %v", err)
 	}
 	if alice.ID != 1 {
@@ -265,7 +265,7 @@ func insertAliceBob(t *testing.T) {
 
 	// insert Bob as row #2
 	bob.ID = 0
-	if err := Insert(db, "person", bob); err != nil {
+	if err := Insert(testCtx, db, "person", bob); err != nil {
 		t.Errorf("Error inserting Bob: %v", err)
 	}
 	if bob.ID != 2 {
@@ -529,7 +529,7 @@ func TestThrowAway(t *testing.T) {
 
 	Debug = false
 	hp := new(HalfPerson)
-	err := QueryRow(db, hp, "select * from person where id = 1")
+	err := QueryRow(testCtx, db, hp, "select * from person where id = 1")
 	if err != nil {
 		t.Errorf("QueryRow error: %v", err)
 	}

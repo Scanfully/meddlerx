@@ -1,6 +1,7 @@
-package meddler
+package meddlerx
 
 import (
+	"context"
 	"testing"
 )
 
@@ -25,17 +26,19 @@ type ItemZeroes struct {
 	Bool    bool       `meddler:"nullbool,zeroisnull"`
 }
 
+var testCtx = context.Background()
+
 func TestZeroIsNullMeddler(t *testing.T) {
 	once.Do(setup)
 
 	before := &ItemZeroes{}
-	if err := Save(db, "null_item", before); err != nil {
+	if err := Save(testCtx, db, "null_item", before); err != nil {
 		t.Errorf("Save error: %v", err)
 	}
 	id := before.ID
 
 	after := new(ItemZeroes)
-	if err := Load(db, "null_item", after, id); err != nil {
+	if err := Load(testCtx, db, "null_item", after, id); err != nil {
 		t.Errorf("Load error: %v", err)
 	}
 
@@ -73,14 +76,14 @@ func TestJsonMeddler(t *testing.T) {
 		},
 	}
 
-	if err := Save(db, "item", elt); err != nil {
+	if err := Save(testCtx, db, "item", elt); err != nil {
 		t.Errorf("Save error: %v", err)
 	}
 	id := elt.ID
 
 	// load it again
 	elt = new(ItemJson)
-	if err := Load(db, "item", elt, id); err != nil {
+	if err := Load(testCtx, db, "item", elt, id); err != nil {
 		t.Errorf("Load error: %v", err)
 	}
 
@@ -121,14 +124,14 @@ func TestGobMeddler(t *testing.T) {
 		},
 	}
 
-	if err := Save(db, "item", elt); err != nil {
+	if err := Save(testCtx, db, "item", elt); err != nil {
 		t.Errorf("Save error: %v", err)
 	}
 	id := elt.ID
 
 	// load it again
 	elt = new(ItemGob)
-	if err := Load(db, "item", elt, id); err != nil {
+	if err := Load(testCtx, db, "item", elt, id); err != nil {
 		t.Errorf("Load error: %v", err)
 	}
 

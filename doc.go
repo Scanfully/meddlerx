@@ -13,4 +13,4 @@
 //
 // 	http://github.com/russross/meddler
 
-package meddler
+package meddlerx

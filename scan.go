@@ -1,4 +1,4 @@
-package meddler
+package meddlerx
 
 import (
 	"database/sql"
@@ -190,7 +190,9 @@ func Columns(src interface{}, includePk bool) ([]string, error) {
 }
 
 // ColumnsQuoted is similar to Columns, but it return the list of columns in the form:
-//   `column1`,`column2`,...
+//
+//	`column1`,`column2`,...
+//
 // using Quote as the quote character.
 func (d *Database) ColumnsQuoted(src interface{}, includePk bool) (string, error) {
 	unquoted, err := d.Columns(src, includePk)
@@ -353,7 +355,9 @@ func Placeholders(src interface{}, includePk bool) ([]string, error) {
 
 // PlaceholdersString returns a list of placeholders suitable for an INSERT
 // or UPDATE query in string form, e.g.:
-//   ?,?,?,?
+//
+//	?,?,?,?
+//
 // if includePk is false, the primary key field is omitted.
 func (d *Database) PlaceholdersString(src interface{}, includePk bool) (string, error) {
 	lst, err := d.Placeholders(src, includePk)
