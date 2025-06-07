@@ -1,4 +1,4 @@
-module github.com/russross/meddler
+module github.com/scanfully/meddlerx
 
 go 1.13
 
