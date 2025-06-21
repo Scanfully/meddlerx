@@ -60,7 +60,7 @@ func (d *Database) Load(ctx context.Context, db Querier, table string, dst inter
 	}
 
 	// run the query
-	q := fmt.Sprintf("SELECT %s FROM %s WHERE %s = %s", columns, d.quoted(table), d.quoted(pkName), d.Placeholder)
+	q := fmt.Sprintf("SELECT %s FROM %s WHERE %s = %s", columns, d.quotedTable(table), d.quoted(pkName), d.Placeholder)
 
 	rows, err := db.QueryContext(ctx, q, pk)
 	if err != nil {
@@ -104,7 +104,7 @@ func (d *Database) Insert(ctx context.Context, db Querier, table string, src int
 	}
 
 	// run the query
-	q := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", d.quoted(table), namesPart, valuesPart)
+	q := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", d.quotedTable(table), namesPart, valuesPart)
 	if d.UseReturningToGetID && pkName != "" {
 		q += " RETURNING " + d.quoted(pkName)
 		var newPk int64
@@ -183,7 +183,7 @@ func (d *Database) Update(ctx context.Context, db Querier, table string, src int
 	ph := d.placeholder(len(placeholders) + 1)
 
 	// run the query
-	q := fmt.Sprintf("UPDATE %s SET %s WHERE %s=%s", d.quoted(table),
+	q := fmt.Sprintf("UPDATE %s SET %s WHERE %s=%s", d.quotedTable(table),
 		strings.Join(pairs, ","),
 		d.quoted(pkName), ph)
 	values = append(values, pkValue)
@@ -254,4 +254,13 @@ func (d *Database) QueryAll(ctx context.Context, db Querier, dst interface{}, qu
 // QueryAll using the Default Database type
 func QueryAll(ctx context.Context, db Querier, dst interface{}, query string, args ...interface{}) error {
 	return Default.QueryAll(ctx, db, dst, query, args...)
+}
+
+// quotedTable returns the properly quoted table name, handling optional schema (e.g., schema.table)
+func (d *Database) quotedTable(table string) string {
+	parts := strings.Split(table, ".")
+	for i, part := range parts {
+		parts[i] = d.quoted(part)
+	}
+	return strings.Join(parts, ".")
 }
